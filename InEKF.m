@@ -15,4 +15,29 @@ classdef InEKF < handle
             obj.mu = init.mu;
             obj.Sigma = init.Sigma;
         end
+        
+        function prediction(obj, u) 
+           %u is IMU data(?)
+           %build state matrix from v, p, R mu values?
+           %get state_pred from gfun(state, u)
+           %how is H matrix different from state matrix?
+           %u_se3 = logm(H_prev \ H_pred)
+           
+           %Adjoint function?
+           %Call adjoint anonymous function
+           %call propagation(u_se3, AdjX)
+        end
+        
+        function propagation(obj, u, AdjX)
+           %u is in se(3)
+           %what are the shapes of u, obj.mu?
+            % u is square, mu's 2nd dim == u's first dim
+           %propagate mean
+           %obj.mu_pred = obj.mu * expm(u);
+           %propagate covariance
+        end
+        
+        function correction(obj, gps_measurement)
+            
+        end
     end

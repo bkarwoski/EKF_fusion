@@ -5,7 +5,7 @@ The images in the folder ./AGZ/Street View Images/ are property of Google Inc. p
 *-------------------------------------------------------------------------------------------------------*
 
 ./AGZ/Log Files/BarometricPressure.csv
-This file contains data from the onoard barometric presure sensor:
+This file contains data from the on-board barometric pressure sensor:
 1: Timestemp, 2: Pressure, 3: Altitude, 4: Temperature
 
 ./AGZ/Log Files/GroundTruthAGL.csv

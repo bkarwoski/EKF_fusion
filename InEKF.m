@@ -44,6 +44,8 @@ classdef InEKF < handle
             N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
             S = H * obj.Sigma * H' + N; % S: 5*5
             L = obj.Sigma * H' * inv(S); % L: 9*5
+            b = [0 0 0 0 1];
+            obj.mu = expm(L * (obj.mu_pred * gps_measurement - b')) * obj.mu_pred;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma_pred * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

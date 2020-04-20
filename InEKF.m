@@ -38,6 +38,13 @@ classdef InEKF < handle
         end
         
         function correction(obj, gps_measurement)
-            
+            H = zeros(5, 9);
+            H(1:3, 7:9) = eye(3);
+            % covaraince_v is 5*5 with the top left 3*3 block needed.
+            N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
+            S = H * obj.Sigma * H' + N; % S: 5*5
+            L = obj.Sigma * H' * inv(S); % L: 9*5
+            obj.Sigma = (eye(9) - L * H) * obj.Sigma_pred * (eye(9) - L * H)' ...
+                + L * N * L';    
         end
     end

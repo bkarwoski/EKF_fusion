@@ -17,7 +17,7 @@ classdef InEKF < handle
         end
         
         function prediction(obj, u) 
-           %u is IMU data(?)
+           %u is IMU data, 1 x 7, 2:4 is x y z accel 5:7 gyro rotations
            %build state matrix from v, p, R mu values?
            %get state_pred from gfun(state, u)
            %how is H matrix different from state matrix?
@@ -30,7 +30,7 @@ classdef InEKF < handle
            %call propagation(u_se3, AdjX)
         end
         
-        function propagation(obj, u, AdjX)
+        function propagation(obj, u) %propagation not needed
            %u is in se(3)
            %what are the shapes of u, obj.mu?
             % u is square, mu's 2nd dim == u's first dim

@@ -32,15 +32,16 @@ alt = dataArray{:, 5};
 % temperature_raw = dataArray{:, 12};
 
 len = size(lat);
-Y = zeros(len(1), 3);
+Y = zeros(len(1), 4);
 [x, y, z] = gps2cart(lat(1), lon(1), alt(1));
-initial = [x, y, z];
+initial = [timestamp(1), x, y, z];
 for i = 1:len(1)
+    ti = timestamp(i);
     la = lat(i);
     lo = lon(i);
     al = alt(i);
     [x, y, z] = gps2cart(la, lo, al);
-    Y(i,:) = [x, y, z] - initial;
+    Y(i,:) = [ti, x, y, z] - initial;
 end
 
 %% Clear temporary variables

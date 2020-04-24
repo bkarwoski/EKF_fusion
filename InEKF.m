@@ -22,8 +22,10 @@ classdef InEKF < handle
            %get state_pred from gfun(state, u)
            %how is H matrix different from state matrix?
            %u_se3 = logm(H_prev \ H_pred)
+           state = obj.Sigma;
+           state_pred = obj.gfun(state, u);
            
-           %Adjoint function?
+           %Adjoint function? Not necessary
            %Call adjoint anonymous function
            %call propagation(u_se3, AdjX)
         end

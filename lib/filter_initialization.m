@@ -4,7 +4,7 @@ function filter = filter_initialization(sys, initialStateMean,initialStateCov)
 %Note: This script exists for legacy reasons
 init.mu = initialStateMean;
 init.Sigma = initialStateCov;
-filter = InEKF(sys, init);
+filter = InEKF(init);
 
 %From SE(2) example:
 %         init.mu = eye(3);

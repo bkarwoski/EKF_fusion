@@ -1,5 +1,5 @@
 %% Initialize variables.
-filename = '../AGZ_subset/Log Files/RawGyro.csv';
+filename = 'AGZ_subset/Log Files/RawGyro.csv';
 delimiter = ',';
 startRow = 2;
 

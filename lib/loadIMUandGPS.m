@@ -1,7 +1,7 @@
 clear;
 
 %% load Accel.
-filename = '../AGZ_subset/Log Files/RawAccel.csv';
+filename = 'AGZ_subset/Log Files/RawAccel.csv';
 delimiter = ',';
 startRow = 2;
 
@@ -26,7 +26,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 
 %% load Gyro.
-filename = '../AGZ_subset/Log Files/RawGyro.csv';
+filename = 'AGZ_subset/Log Files/RawGyro.csv';
 delimiter = ',';
 startRow = 2;
 
@@ -49,7 +49,7 @@ gyro = [timestamp, x, y, z];
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% load Cartesian GPS.
-filename = '../AGZ_subset/Log Files/OnboardGPS.csv';
+filename = 'AGZ_subset/Log Files/OnboardGPS.csv';
 delimiter = ',';
 startRow = 2;
 

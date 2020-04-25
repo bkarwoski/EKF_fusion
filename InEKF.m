@@ -10,20 +10,18 @@ classdef InEKF < handle
     end
     
     methods
-        function obj = InEKF(sys, init)
-            obj.gfun = sys.gfun;
+        function obj = InEKF(init)
+%             obj.gfun = sys.gfun;
             obj.mu = init.mu;
             obj.Sigma = init.Sigma;
         end
         
         function prediction(obj, u) 
-           %u is IMU data, 1 x 7, 2:4 is x y z accel 5:7 gyro rotations
-           %build state matrix from v, p, R mu values?
-           %get state_pred from gfun(state, u)
-           %how is H matrix different from state matrix?
            %u_se3 = logm(H_prev \ H_pred)
-           state = obj.Sigma;
-           state_pred = obj.gfun(state, u);
+%            state = obj.Sigma; 
+%            state_pred = obj.gfun(state, u);
+           state_pred = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+           %todo remove state_pred, just use state?
            
            %Adjoint function? Not necessary
            %Call adjoint anonymous function
@@ -52,3 +50,4 @@ classdef InEKF < handle
                 + L * N * L';    
         end
     end
+end

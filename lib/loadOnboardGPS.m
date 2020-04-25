@@ -12,7 +12,7 @@
 % more details: https://home.hibu.no/AtekStudenter1212/doxygen/bb_handler/structvehicle__gps__position__s.html
 
 %% Initialize variables.
-filename = 'Log Files/OnboardGPS.csv';
+filename = '../AGZ_subset/Log Files/OnboardGPS.csv';
 delimiter = ',';
 startRow = 2;
 

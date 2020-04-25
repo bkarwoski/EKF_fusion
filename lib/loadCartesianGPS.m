@@ -5,7 +5,7 @@
 % ./AGZ/Log Files/OnbordGPS.csv
 
 %% Initialize variables.
-filename = 'AGZ_subset/Log Files/OnboardGPS.csv';
+filename = '../AGZ_subset/Log Files/OnboardGPS.csv';
 delimiter = ',';
 startRow = 2;
 
@@ -32,7 +32,7 @@ alt = dataArray{:, 5};
 % temperature_raw = dataArray{:, 12};
 
 len = size(lat);
-Y = zeros(len(1), 4);
+GPS = zeros(len(1), 4);
 [x, y, z] = gps2cart(lat(1), lon(1), alt(1));
 initial = [timestamp(1) / 1000000, x, y, z];
 for i = 1:len(1)
@@ -41,7 +41,7 @@ for i = 1:len(1)
     lo = lon(i);
     al = alt(i);
     [x, y, z] = gps2cart(la, lo, al);
-    Y(i,:) = [ti, x, y, z] - initial;
+    GPS(i,:) = [ti, x, y, z] - initial;
 end
 
 %% Clear temporary variables

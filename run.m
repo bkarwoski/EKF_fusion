@@ -8,9 +8,9 @@ initialStateMean = zeros(5);
 initialStateMean(1:3, 1:3) = eye(3);
 initialStateCov = eye(9);
 deltaT = 1 / 30 %hope this doesn't cause floating point problems
-numSteps = %largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = %TODO largest timestamp in GPS file, divided by deltaT, cast to int
 results = zeros(7, numSteps)
-sys = system_initialization();
+sys = system_initialization(deltaT);
 filter = filter_initialization(sys, initialStateMean, initialStateCov);
 
 %IMU noise? do in filter initialization

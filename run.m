@@ -5,6 +5,7 @@ function varargout = run(pauseLen)
 
 addpath([cd, filesep, 'lib'])
 initialStateMean = zeros(5);
+initialStateMean(1:3, 1:3) = eye(3);
 initialStateCov = eye(9);
 deltaT = 1 / 30 %hope this doesn't cause floating point problems
 numSteps = %largest timestamp in GPS file, divided by deltaT, cast to int

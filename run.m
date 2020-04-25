@@ -29,7 +29,7 @@ for t = 1:numSteps
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
         filter.correction(nextGPS);
         GPSIdx = IMUIdx + 1;
-        nextGPS = gps_measurement(GPSIdx, :)
+        nextGPS = gps_measurement(GPSIdx, :);
     end
     results(1:3, t) = filter.mu(5, 1:3); %just position so far
 end

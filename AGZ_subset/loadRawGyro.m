@@ -38,7 +38,7 @@ fclose(fileID);
 % script.
 
 %% Allocate imported array to column variable names
-timestamp = dataArray{:, 1};
+timestamp = (dataArray{:, 1} - dataArray{1, 1}(1, 1)) ./ 1000000.0;
 x = dataArray{:, 3};
 y = dataArray{:, 4};
 z = dataArray{:, 5};

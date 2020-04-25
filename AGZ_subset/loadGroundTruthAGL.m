@@ -9,7 +9,7 @@
 % All values regarding positions are in the WGS 84 / UTM zone 32N coordinate system use plotPath.m to visualize the data in matlab
 
 %% Initialize variables.
-filename = 'AGZ_subset/Log Files/GroundTruthAGL.csv';
+filename = 'Log Files/GroundTruthAGL.csv';
 delimiter = ',';
 startRow = 2;
 

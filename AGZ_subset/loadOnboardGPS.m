@@ -53,7 +53,8 @@ fclose(fileID);
 % script.
 
 %% Allocate imported array to column variable names
-timestamp = dataArray{:, 1};
+% note that GPS timestamp does not sync with IMU timestamps, offset exists
+timestamp = (dataArray{:, 1} - dataArray{1, 1}(1, 1)) ./ 1000000.0;
 lat = dataArray{:, 3};
 lon = dataArray{:, 4};
 alt = dataArray{:, 5};

@@ -1,5 +1,5 @@
 %% Initialize variables.
-filename = 'AGZ_subset/Log Files/RawAccel.csv';
+filename = '../AGZ_subset/Log Files/RawAccel.csv';
 delimiter = ',';
 startRow = 2;
 
@@ -49,6 +49,9 @@ x_raw = dataArray{:, 9};
 y_raw = dataArray{:, 10};
 z_raw = dataArray{:, 11};
 temperature_raw = dataArray{:, 12};
+
+accel = [timestamp, x, y, z];
+
 
 %% Clear temporary variables
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;

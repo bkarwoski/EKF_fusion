@@ -29,12 +29,34 @@ classdef InEKF < handle
         end
         
         function propagation(obj, u) %propagation not needed
-           %u is in se(3)
-           %what are the shapes of u, obj.mu?
-            % u is square, mu's 2nd dim == u's first dim
-           %propagate mean
-           %obj.mu_pred = obj.mu * expm(u);
-           %propagate covariance
+            %u is in se(3)
+            %what are the shapes of u, obj.mu?
+                % u is square, mu's 2nd dim == u's first dim
+            %propagate mean
+            %obj.mu_pred = obj.mu * expm(u);
+            %propagate covariance
+
+            % from slide 36, u doesn't need to be se(3), using raw IMU here.
+            
+            mu_pred = zeros(5);
+            mu = obj.mu;
+            omega = u(5:7);
+            accel = u(2:4);
+            mu_pred(1:3, 1:3) = mu(1:3, 1:3) * twisted(omega);
+            mu_pred(1:3, 4) = mu(1:3, 1:3) * accel' +[0 0 -9.81]';
+            mu_pred(1:3, 5) = mu(1:3, 5);
+            obj.mu_pred = mu_pred; 
+            
+            Adj = zeros(9); 
+            Adj(1:3, 1:3) = - twisted(omega);
+            Adj(4:6, 1:3) = - twisted(accel);
+            Adj(4:6, 4:6) = - twisted(omega);
+            Adj(7:9, 4:6) = eye(3);
+            Adj(7:9, 7:9) = -twisted(omega);
+
+            % Q is the covariance of IMU, comes from the accelation of the gyro, 9*9
+            obj.Sigma_pred = Adj * obj.Sigma + obj.Sigma * Adj' + Q;
+            
         end
         
         function correction(obj, gps_measurement)

@@ -1,6 +1,7 @@
 function sys = system_initialization() %alphas, beta)
 
-sys.gfun = @(mu, u) [...] %discrete IMU motion model?
+sys.gfun = @(mu, u) [...
+    ] %discrete IMU motion model?
     
 sys.hfun = @(gps_measurement_data)[...] %identity?
 
@@ -32,4 +33,13 @@ sys.Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
 % sys.Q = [...
 %         beta^2,    0;
 %         0,      25^2];
+end
+
+function f = imuDynamics(mu, u)
+%mu 5x5 state matrix
+%u 3x2, first column accels, second column gyros
+R_k = mu(1:3, 1:3);
+v_k = mu(1:3, 4);
+p_k = mu(1:3, 5);
+
 end

@@ -5,7 +5,7 @@
 % ./AGZ/Log Files/OnbordGPS.csv
 
 %% Initialize variables.
-filename = '../AGZ_subset/Log Files/OnboardGPS.csv';
+filename = './AGZ_subset/Log Files/OnboardGPS.csv';
 delimiter = ',';
 startRow = 2;
 

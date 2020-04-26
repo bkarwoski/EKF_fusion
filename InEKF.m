@@ -55,16 +55,20 @@ classdef InEKF < handle
         
         function correction(obj, gps_measurement)
             gps = [gps_measurement, 0, 1]';
-            H = zeros(3, 9);
+            H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             gpsNoise = 1; %meters, initially constant
             covariance_v = [eye(3).*gpsNoise^2, zeros(3,2); zeros(2,5)];
+            covariance_v(4,4) = 1;
+            covariance_v(5,5) = 1;
             N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
-            N = N(1:3, 1:3);
+            % N = N(1:3, 1:3);
             S = H * obj.Sigma * H' + N;
             L = obj.Sigma * H' * inv(S);
             b = [0 0 0 0 1]';
             obj.mu = expm(L * (obj.mu * gps - b)) * obj.mu;
+
+            % unsolved expm(mu), should map mu 1 by 9 to lie group, 9 by 9 ?
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

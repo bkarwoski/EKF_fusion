@@ -49,23 +49,27 @@ classdef InEKF < handle
             A(7:9, 4:6) = eye(3);
             A(7:9, 7:9) = -twisted(omega); 
 
-            obj.Sigma_pred = A * obj.Sigma + obj.Sigma * A' + obj.Q;
+            obj.Sigma = A * obj.Sigma + obj.Sigma * A' + obj.Q;
             
         end
         
         function correction(obj, gps_measurement)
+            gps = [gps_measurement, 0, 1]';
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
-            % covaraince_v is 5*5 with the top left 3*3 block needed.
-            gpsNoise = 0.5; %meters
-            covariance_v = [eye(3).*gpsNoise, zeros(3,2); zeros(2,5)];
-            %TODO- update GPS covariance every timestep
+            gpsNoise = 1; %meters, initially constant
+            covariance_v = [eye(3).*gpsNoise^2, zeros(3,2); zeros(2,5)];
+            covariance_v(4,4) = 1;
+            covariance_v(5,5) = 1;
             N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
-            S = H * obj.Sigma * H' + N; % S: 5*5
-            L = obj.Sigma * H' * inv(S); % L: 9*5
-            b = [0 0 0 0 1];
-            obj.mu = expm(L * (obj.mu_pred * gps_measurement - b')) * obj.mu_pred;
-            obj.Sigma = (eye(9) - L * H) * obj.Sigma_pred * (eye(9) - L * H)' ...
+            % N = N(1:3, 1:3);
+            S = H * obj.Sigma * H' + N;
+            L = obj.Sigma * H' * inv(S);
+            b = [0 0 0 0 1]';
+            obj.mu = expm(L * (obj.mu * gps - b)) * obj.mu;
+
+            % unsolved expm(mu), should map mu 1 by 9 to lie group, 9 by 9 ?
+            obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end
         

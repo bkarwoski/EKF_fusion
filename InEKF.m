@@ -43,11 +43,11 @@ classdef InEKF < handle
             obj.mu(1:3, 5) = obj.mu(1:3, 5);
             
             A = zeros(9); 
-            A(1:3, 1:3) = - twisted(omega);
-            A(4:6, 1:3) = - twisted(accel);
-            A(4:6, 4:6) = - twisted(omega);
+            A(1:3, 1:3) = - skew(omega);
+            A(4:6, 1:3) = - skew(accel);
+            A(4:6, 4:6) = - skew(omega);
             A(7:9, 4:6) = eye(3);
-            A(7:9, 7:9) = -twisted(omega); 
+            A(7:9, 7:9) = -skew(omega); 
 
             obj.Sigma = A * obj.Sigma + obj.Sigma * A' + obj.Q;
             
@@ -66,9 +66,37 @@ classdef InEKF < handle
             S = H * obj.Sigma * H' + N;
             L = obj.Sigma * H' * inv(S);
             b = [0 0 0 0 1]';
-            obj.mu = expm(L * (obj.mu * gps - b)) * obj.mu;
 
             % unsolved expm(mu), should map mu 1 by 9 to lie group, 9 by 9 ?
+
+
+            % check slide 69
+            zai_hat = zeros(5);
+            % zai 9 by 9
+            zai = L * (obj.mu * gps - b);
+            phi = zai(1:3); 
+            rho1 = zai(4:6);
+            rho2 = zai(7:9);
+            % check slide 66, assume theta in sphererical coordinate
+            % deal with special condition, 1e-9 a threshold for small value, changeable
+            jacobian_phi = eye(3);
+            if phi(3) > 1e-9
+                theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
+                if theta < 1e-9
+                    jacobian_phi = jacobian_phi + skew(phi);
+                else
+                    jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
+                    + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
+                end
+            end
+           
+            zai_hat(1:3, 1:3) = expm(skew(phi));
+            zai_hat(1:3, 4) = jacobian_phi * rho1;
+            zai_hat(1:3, 5) = jacobian_phi * rho2;
+            zai_hat(4:5, 4:5) = eye(2);
+            
+            obj.mu = zai_hat * obj.mu;
+
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

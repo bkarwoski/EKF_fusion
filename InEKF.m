@@ -22,10 +22,6 @@ classdef InEKF < handle
 %            state_pred = obj.gfun(state, u);
            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
            %todo remove state_pred, just use state?
-           
-           %Adjoint function? Not necessary
-           %Call adjoint anonymous function
-           %call propagation(u_se3, AdjX)
         end
         
         function propagation(obj, u) %propagation not needed
@@ -38,24 +34,28 @@ classdef InEKF < handle
 
             % from slide 36, u doesn't need to be se(3), using raw IMU here.
             
-            mu_pred = zeros(5);
-            mu = obj.mu;
             omega = u(5:7);
             accel = u(2:4);
-            mu_pred(1:3, 1:3) = mu(1:3, 1:3) * twisted(omega);
-            mu_pred(1:3, 4) = mu(1:3, 1:3) * accel' +[0 0 -9.81]';
-            mu_pred(1:3, 5) = mu(1:3, 5);
-            obj.mu_pred = mu_pred; 
+            obj.mu(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
+            obj.mu(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
+            obj.mu(1:3, 5) = obj.mu(1:3, 5);
             
-            Adj = zeros(9); 
-            Adj(1:3, 1:3) = - twisted(omega);
-            Adj(4:6, 1:3) = - twisted(accel);
-            Adj(4:6, 4:6) = - twisted(omega);
-            Adj(7:9, 4:6) = eye(3);
-            Adj(7:9, 7:9) = -twisted(omega); 
+            A = zeros(9); 
+            A(1:3, 1:3) = - twisted(omega);
+            A(4:6, 1:3) = - twisted(accel);
+            A(4:6, 4:6) = - twisted(omega);
+            A(7:9, 4:6) = eye(3);
+            A(7:9, 7:9) = -twisted(omega); 
 
             % Q is the covariance of IMU, comes from the accelation of the gyro, 9*9
-            obj.Sigma_pred = Adj * obj.Sigma + obj.Sigma * Adj' + Q;
+            Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
+            %IMU noise characteristics
+            %Using default values from pixhawk px4 controller
+            %https://dev.px4.io/v1.9.0/en/advanced/parameter_reference.html
+            %accel: first three values, (m/s^2)^2
+            %gyro: next three values, (rad/s)^2
+            
+            obj.Sigma_pred = A * obj.Sigma + obj.Sigma * A' + Q;
             
         end
         

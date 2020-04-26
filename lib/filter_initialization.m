@@ -1,4 +1,4 @@
-function filter = filter_initialization(sys, initialStateMean,initialStateCov)
+function filter = filter_initialization(initialStateMean,initialStateCov)
 %initialStateMean should be 5x5
 %initialStateCov should be 9x9
 %Note: This script exists for legacy reasons

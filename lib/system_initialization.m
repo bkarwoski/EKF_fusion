@@ -9,7 +9,7 @@ sys.gfun = @(mu, u) imuDynamics(mu, u, deltaT); %discrete IMU motion model
 % sys.M = [zeros(3,2), eye(3), zeros(3,2); zeros
 %Represents noise characteristics for GPS(?)
 
-sys.Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
+% sys.Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
 %IMU noise characteristics
 %Using default values from pixhawk px4 controller
 %https://dev.px4.io/v1.9.0/en/advanced/parameter_reference.html

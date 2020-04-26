@@ -135,5 +135,5 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% save data
 Filename = sprintf('IMU_GPS_GT_data.mat');
-save(Filename, 'accel', 'imu', 'gt');
+save(Filename, 'gps', 'imu', 'gt');
 

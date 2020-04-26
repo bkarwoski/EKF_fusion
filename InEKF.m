@@ -49,15 +49,15 @@ classdef InEKF < handle
             mu_pred(1:3, 5) = mu(1:3, 5);
             obj.mu_pred = mu_pred; 
             
-            Adj = zeros(9); 
-            Adj(1:3, 1:3) = - skew(omega);
-            Adj(4:6, 1:3) = - skew(accel);
-            Adj(4:6, 4:6) = - skew(omega);
-            Adj(7:9, 4:6) = eye(3);
-            Adj(7:9, 7:9) = -skew(omega);
+            A = zeros(9); 
+            A(1:3, 1:3) = - skew(omega);
+            A(4:6, 1:3) = - skew(accel);
+            A(4:6, 4:6) = - skew(omega);
+            A(7:9, 4:6) = eye(3);
+            A(7:9, 7:9) = -skew(omega);
 
             % Q is the covariance of IMU, comes from the accelation of the gyro, 9*9
-            obj.Sigma_pred = Adj * obj.Sigma + obj.Sigma * Adj' + Q;
+            obj.Sigma_pred = A * obj.Sigma + obj.Sigma * A' + Q;
             
         end
         

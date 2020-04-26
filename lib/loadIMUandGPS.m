@@ -1,3 +1,10 @@
+%% README
+% This script loads IMU data into 
+% imu = [ts, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z],
+% It loads GPS data into
+% gps = [ts, gps_x, gps_y, gps_z]
+% NOTE: timestamps of IMU and GPS are not matched
+
 clear;
 
 %% load Accel.
@@ -45,6 +52,8 @@ y = dataArray{:, 4};
 z = dataArray{:, 5};
 
 gyro = [timestamp, x, y, z];
+
+imu = [accel, x, y, z];
 
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 

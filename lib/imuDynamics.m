@@ -1,7 +1,6 @@
-
 function mu_pred = imuDynamics(mu, u, deltaT)
 %mu 5x5 state matrix
-%u 3x2, first column accels, second column gyros
+%u 1x6, first accels, second gyros
 R_k = mu(1:3, 1:3);
 v_k = mu(1:3, 4);
 p_k = mu(1:3, 5);

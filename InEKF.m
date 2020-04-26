@@ -2,26 +2,28 @@ classdef InEKF < handle
     properties
         mu;                 % Pose Mean
         Sigma;              % Pose Sigma
-        gfun;               % Motion model function
-        mu_pred;             % Mean after prediction step
-        Sigma_pred;          % Sigma after prediction step
         mu_cart;
         sigma_cart;
+        Q;                  %IMU accel and gyro noise
     end
     
     methods
         function obj = InEKF(init)
-%             obj.gfun = sys.gfun;
             obj.mu = init.mu;
             obj.Sigma = init.Sigma;
+            obj.Q = init.Q;
         end
         
         function prediction(obj, u) 
            %u_se3 = logm(H_prev \ H_pred)
 %            state = obj.Sigma; 
 %            state_pred = obj.gfun(state, u);
+           pose_prev = obj.posemat(obj.mu);
            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+           pose_next = obj.posemat(obj.mu);
            %todo remove state_pred, just use state?
+           u_se3 = logm(pose_prev \ pose_next);
+           obj.propagation(u_se3);
         end
         
         function propagation(obj, u) %propagation not needed
@@ -70,6 +72,12 @@ classdef InEKF < handle
             obj.mu = expm(L * (obj.mu_pred * gps_measurement - b')) * obj.mu_pred;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma_pred * (eye(9) - L * H)' ...
                 + L * N * L';    
+        end
+        
+        function Rt = posemat(mu)
+            R = mu(1:3, 1:3);
+            t = mu(1:3, 5);
+            Rt = [R, t; 0 0 0 1];
         end
     end
 end

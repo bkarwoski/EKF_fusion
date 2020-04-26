@@ -1,5 +1,4 @@
 function X = skew(x)
-%NOTE: I don't think this function is needed -bk
 % vector to skew R^3 -> so(3)
 X = [   0,  -x(3),  x(2);
     x(3),      0,  -x(1);

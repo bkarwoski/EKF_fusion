@@ -22,7 +22,7 @@ Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
 %accel: first three values, (m/s^2)^2
 %gyro: next three values, (rad/s)^2 
 
-filter = filter_initialization(initialStateMean, initialStateCov);
+filter = filter_initialization(initialStateMean, initialStateCov, Q);
 
 %IMU noise? do in filter initialization
 

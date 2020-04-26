@@ -49,15 +49,7 @@ classdef InEKF < handle
             A(7:9, 4:6) = eye(3);
             A(7:9, 7:9) = -twisted(omega); 
 
-            % Q is the covariance of IMU, comes from the accelation of the gyro, 9*9
-            Q = blkdiag(eye(3)*(0.35)^2, eye(3)*(0.015)^2, zeros(3));
-            %IMU noise characteristics
-            %Using default values from pixhawk px4 controller
-            %https://dev.px4.io/v1.9.0/en/advanced/parameter_reference.html
-            %accel: first three values, (m/s^2)^2
-            %gyro: next three values, (rad/s)^2
-            
-            obj.Sigma_pred = A * obj.Sigma + obj.Sigma * A' + Q;
+            obj.Sigma_pred = A * obj.Sigma + obj.Sigma * A' + obj.Q;
             
         end
         
@@ -65,6 +57,9 @@ classdef InEKF < handle
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             % covaraince_v is 5*5 with the top left 3*3 block needed.
+            gpsNoise = 0.5; %meters
+            covariance_v = [eye(3).*gpsNoise, zeros(3,2); zeros(2,5)];
+            %TODO- update GPS covariance every timestep
             N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
             S = H * obj.Sigma * H' + N; % S: 5*5
             L = obj.Sigma * H' * inv(S); % L: 9*5

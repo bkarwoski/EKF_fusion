@@ -3,6 +3,10 @@ clear
 close
 %%Initializations
 %TODO: load data here
+data = load('lib/IMU_GPS_GT_data.mat');
+IMUData = data.imu;
+GPSData = data.gps;
+gt = data.gt;
 
 addpath([cd, filesep, 'lib'])
 initialStateMean = zeros(5);
@@ -30,16 +34,16 @@ filter = filter_initialization(initialStateMean, initialStateCov, Q);
 IMUIdx = 1;
 GPSIdx = 1;
 nextIMU = IMUData(IMUIdx, :); %first IMU measurement
-nextGPS = gps_measurement(GPSIdx, :); %first GPS measurement
+nextGPS = GPSData(GPSIdx, :); %first GPS measurement
 
 %plot ground truth, raw GPS data
-loadGroundTruthAGL
+
 % plot ground truth positions
-plot3(x_gt, y_gt, z_gt, '.')
+plot3(gt(:,1), gt(:,2), gt(:,3), '.')
 grid on
 hold on
 % plot gps positions
-plot3(x_gps, y_gps, z_gps, 'or')
+plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), 'or')
 axis equal
 axis vis3d
 
@@ -53,7 +57,7 @@ for t = 1:numSteps
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
         filter.correction(nextGPS);
         GPSIdx = IMUIdx + 1;
-        nextGPS = gps_measurement(GPSIdx, :);
+        nextGPS = GPSData(GPSIdx, :);
     end
     results(2:4, t) = filter.mu(5, 1:3); %just position so far
     plot3(results(2:4, t));
@@ -71,6 +75,4 @@ end
     
 %plot results
 %pause for some period of time
-end
-
 end

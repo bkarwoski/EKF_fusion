@@ -73,7 +73,7 @@ classdef InEKF < handle
             % check slide 69
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
-            % zai 9 by 9
+            % zai 9 by 1
             zai = L * (obj.mu * gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);

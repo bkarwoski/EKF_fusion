@@ -58,6 +58,8 @@ classdef InEKF < handle
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             gpsNoise = 1; %meters, initially constant
+            % covariance should be 5 instead of 3 so that N, hence L could match 
+            % the dimension when calculating mu and sigma
             covariance_v = [eye(3).*gpsNoise^2, zeros(3,2); zeros(2,5)];
             covariance_v(4,4) = 1;
             covariance_v(5,5) = 1;
@@ -67,22 +69,25 @@ classdef InEKF < handle
             L = obj.Sigma * H' * inv(S);
             b = [0 0 0 0 1]';
 
-            % unsolved expm(mu), should map mu 1 by 9 to lie group, 9 by 9 ?
-
-
+            % map mu 1 by 9 to lie group, 5 by 5
             % check slide 69
+            % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 9
             zai = L * (obj.mu * gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);
-            % check slide 66, assume theta in sphererical coordinate
-            % deal with special condition, 1e-9 a threshold for small value, changeable
+
+            % check slide 66
+            % put phi_hat into so(3), and calculate the left jacobian
             jacobian_phi = eye(3);
-            if phi(3) > 1e-9
+            % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
+            e = 1e-9;
+            if phi(3) > e
+                % assume theta in sphererical coordinate
                 theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
-                if theta < 1e-9
+                if theta < e
                     jacobian_phi = jacobian_phi + skew(phi);
                 else
                     jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...

@@ -116,9 +116,10 @@ dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'EmptyValue' ,N
 fclose(fileID);
 
 imgid = dataArray{:, 1};
-x_gt = dataArray{:, 2};
-y_gt = dataArray{:, 3};
-z_gt = dataArray{:, 4};
+coeff = 50;
+x_gt = (dataArray{:, 2} - dataArray{1, 2}(1, 1)) * coeff;
+y_gt = (dataArray{:, 3} - dataArray{1, 3}(1, 1)) * coeff;
+z_gt = (dataArray{:, 4} - dataArray{1, 4}(1, 1));
 omega_gt = dataArray{:, 5};
 phi_gt = dataArray{:, 6};
 kappa_gt = dataArray{:, 7};
@@ -134,6 +135,18 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 
 %% save data
+plot3(x_gt, -y_gt, z_gt, 'o')
+grid on
+hold on
+
+plot3(gps(:, 2), gps(:, 3), gps(:, 4), '.')
+grid on
+hold on
+
+xlabel('x')
+ylabel('y')
+zlabel('z')
+
 Filename = sprintf('IMU_GPS_GT_data.mat');
 save(Filename, 'gps', 'imu', 'gt');
 

@@ -17,6 +17,6 @@ function [x,y,z] = gps2cart(lat,lon,alt)
     % results:
     x = (N + alt) .* cos(lat) .* cos(lon);
     y = (N + alt) .* cos(lat) .* sin(lon);
-    z = ((1 - e^2) .* N + alt) .* sin(lat);
-    
+%     z = ((1 - e^2) .* N + alt) .* sin(lat);
+    z = alt;
 end

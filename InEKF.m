@@ -20,7 +20,7 @@ classdef InEKF < handle
            %u_se3 = logm(H_prev \ H_pred)
 %            state = obj.Sigma; 
 %            state_pred = obj.gfun(state, u);
-           state_pred = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+           obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
            %todo remove state_pred, just use state?
            
            %Adjoint function? Not necessary
@@ -52,7 +52,7 @@ classdef InEKF < handle
             Adj(4:6, 1:3) = - twisted(accel);
             Adj(4:6, 4:6) = - twisted(omega);
             Adj(7:9, 4:6) = eye(3);
-            Adj(7:9, 7:9) = -twisted(omega);
+            Adj(7:9, 7:9) = -twisted(omega); 
 
             % Q is the covariance of IMU, comes from the accelation of the gyro, 9*9
             obj.Sigma_pred = Adj * obj.Sigma + obj.Sigma * Adj' + Q;

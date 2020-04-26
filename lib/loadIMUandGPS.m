@@ -10,9 +10,9 @@
 % 'IMU_GPS_GT_data.mat'
 
 clear;
-
+dir = '../AGZ_subset/';
 %% load Accel.
-filename = 'AGZ_subset/Log Files/RawAccel.csv';
+filename = append(dir , 'Log Files/RawAccel.csv');
 delimiter = ',';
 startRow = 2;
 
@@ -37,7 +37,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 
 %% load Gyro.
-filename = 'AGZ_subset/Log Files/RawGyro.csv';
+filename = append(dir , 'Log Files/RawGyro.csv');
 delimiter = ',';
 startRow = 2;
 
@@ -62,7 +62,7 @@ imu = [accel, x, y, z];
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 %% load Cartesian GPS.
-filename = 'AGZ_subset/Log Files/OnboardGPS.csv';
+filename = append(dir , 'Log Files/OnboardGPS.csv');
 delimiter = ',';
 startRow = 2;
 
@@ -103,7 +103,7 @@ imu(:, 1) = imu(:, 1) + (init_ts_accel - init_ts) / 1000000;
 
 
 %% load Ground Truth.
-filename = '../AGZ_subset/Log Files/GroundTruthAGL.csv';
+filename = append(dir , 'Log Files/GroundTruthAGL.csv');
 delimiter = ',';
 startRow = 2;
 
@@ -125,7 +125,7 @@ kappa_gt = dataArray{:, 7};
 
 ts = [];
 for i = 1:length(imgid)
-    ts = [ts; gps(imgid(i) + 1)];
+    ts = [ts; gps(imgid(i))];
 end
 
 gt = [ts, x_gt, y_gt, z_gt, omega_gt, phi_gt, kappa_gt];

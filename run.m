@@ -9,8 +9,7 @@ GPSData = data.gps;
 gt = data.gt;
 
 addpath([cd, filesep, 'lib'])
-initialStateMean = zeros(5);
-initialStateMean(1:3, 1:3) = eye(3);
+initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
 numSteps = 100;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
@@ -55,7 +54,7 @@ for t = 1:numSteps
         nextIMU = IMUData(IMUIdx, :);
     end
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
-        filter.correction(nextGPS);
+        filter.correction(nextGPS(2:4));
         GPSIdx = IMUIdx + 1;
         nextGPS = GPSData(GPSIdx, :);
     end

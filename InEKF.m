@@ -22,8 +22,8 @@ classdef InEKF < handle
            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
            pose_next = obj.posemat(obj.mu);
            %todo remove state_pred, just use state?
-           invprev_next = pose_prev \ pose_next
-           u_se3 = logm(invprev_next)
+           invprev_next = pose_prev \ pose_next;
+           u_se3 = logm(invprev_next);
            obj.propagation(u_se3);
         end
         
@@ -86,7 +86,7 @@ classdef InEKF < handle
             % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
             e = 1e-9;
             if phi(3) > e
-                % assume theta in sphererical coordinate
+                % assume theta in spherical coordinate
                 theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
                 if theta < e
                     jacobian_phi = jacobian_phi + skew(phi);

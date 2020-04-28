@@ -4,7 +4,7 @@ function mu_pred = imuDynamics(mu, u, deltaT)
 R_k = mu(1:3, 1:3);
 v_k = mu(1:3, 4);
 p_k = mu(1:3, 5);
-a_k = u(1:3);
+a_k = u(1:3)';
 omega_k = u(4:6);
 g = [0; 0; -9.81];
 

@@ -22,7 +22,8 @@ classdef InEKF < handle
            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
            pose_next = obj.posemat(obj.mu);
            %todo remove state_pred, just use state?
-           u_se3 = logm(pose_prev \ pose_next);
+           invprev_next = pose_prev \ pose_next
+           u_se3 = logm(invprev_next)
            obj.propagation(u_se3);
         end
         

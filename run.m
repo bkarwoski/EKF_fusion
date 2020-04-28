@@ -1,6 +1,5 @@
 function varargout = run(pauseLen)
-clear
-close
+
 %%Initializations
 %TODO: load data here
 data = load('lib/IMU_GPS_GT_data.mat');
@@ -49,7 +48,7 @@ axis vis3d
 for t = 1:numSteps
     currT = t * deltaT;
     if(currT >= nextIMU(1)) %if the next IMU measurement has happened
-        filter.prediction(nextIMU)
+        filter.prediction(nextIMU(2:7));
         IMUIdx = IMUIdx + 1;
         nextIMU = IMUData(IMUIdx, :);
     end
@@ -59,7 +58,7 @@ for t = 1:numSteps
         nextGPS = GPSData(GPSIdx, :);
     end
     results(2:4, t) = filter.mu(5, 1:3); %just position so far
-    plot3(results(2:4, t));
+    plot3(results(2, t), results(3, t), results(4, t));
     if pauseLen == inf
         pause;
     elseif pauseLen > 0

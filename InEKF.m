@@ -106,7 +106,7 @@ classdef InEKF < handle
                 + L * N * L';    
         end
         
-        function Rt = posemat(mu)
+        function Rt = posemat(obj, mu)
             R = mu(1:3, 1:3);
             t = mu(1:3, 5);
             Rt = [R, t; 0 0 0 1];

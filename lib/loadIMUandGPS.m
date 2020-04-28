@@ -10,7 +10,7 @@
 % 'IMU_GPS_GT_data.mat'
 
 clear;
-dir = '../AGZ_subset/';
+dir = 'AGZ_subset/';
 %% load Accel.
 filename = append(dir , 'Log Files/RawAccel.csv');
 delimiter = ',';
@@ -138,7 +138,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 plot3(x_gt, -y_gt, z_gt, 'o')
 grid on
 hold on
-
+axis equal
 plot3(gps(:, 2), gps(:, 3), gps(:, 4), '.')
 grid on
 hold on

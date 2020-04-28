@@ -9,7 +9,7 @@ omega_k = u(4:6);
 g = [0; 0; -9.81];
 
 R_k1 = R_k * Gamma_0(omega_k * deltaT);
-v_k1 = v_k + R_K * Gamma_1(omega_k * deltaT) * a_k * deltaT + g * deltaT;
+v_k1 = v_k + R_k * Gamma_1(omega_k * deltaT) * a_k * deltaT + g * deltaT;
 p_k1 = p_k + v_k * deltaT + R_k * Gamma_2(omega_k * deltaT) * a_k *...
        deltaT^2 + 0.5 * g * deltaT^2;
    

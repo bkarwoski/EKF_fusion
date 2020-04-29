@@ -55,8 +55,7 @@ classdef InEKF < handle
         end
         
         function correction(obj, gps_measurement)
-            % gps = [gps_measurement, 0, 1]'; check slide 40
-            
+            gps = [gps_measurement, 0, 1]';
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             gpsNoise = 1; %meters, initially constant
@@ -77,7 +76,7 @@ classdef InEKF < handle
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 1
-            zai = L * (obj.mu * Y - b);
+            zai = L * (obj.mu * Y - gps);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);

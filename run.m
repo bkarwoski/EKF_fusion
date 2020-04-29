@@ -1,4 +1,7 @@
 function varargout = run(pauseLen)
+%for testing
+clear
+pauseLen = 0;
 
 %%Initializations
 %TODO: load data here

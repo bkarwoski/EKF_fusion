@@ -15,16 +15,17 @@ classdef InEKF < handle
         end
         
         function prediction(obj, u) 
-           %u_se3 = logm(H_prev \ H_pred)
-%            state = obj.Sigma; 
-%            state_pred = obj.gfun(state, u);
-           pose_prev = obj.mu
-           obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
-           pose_next = obj.mu
-           %todo remove state_pred, just use state?
-           invprev_next = pose_prev \ pose_next
-           u_se3 = logm(invprev_next)
-           obj.propagation(wedge(u_se3));
+            %u_se3 = logm(H_prev \ H_pred)
+            %            state = obj.Sigma;
+            %            state_pred = obj.gfun(state, u);
+            %            pose_prev = obj.posemat(obj.mu);
+            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+            %            pose_next = obj.posemat(obj.mu);
+            %todo remove state_pred, just use state?
+            %            invprev_next = pose_prev \ pose_next
+            %            u_se3 = logm(invprev_next);
+            %            u_se3_w = wedge(u_se3);
+            obj.propagation(u);
         end
         
         function propagation(obj, u) %propagation not needed
@@ -110,11 +111,10 @@ classdef InEKF < handle
                 + L * N * L';    
         end
         
-%         function Rt = posemat(obj, mu) %Not sure if this function makes sense
-%             Rt =  zeros(5);
-%             Rt(1:3, 1:3) = mu(1:3, 1:3);
-%             Rt( = mu(1:3, 5);
-%             Rt = [R, t; 0 0 0 1];
-%         end
+        function Rt = posemat(obj, mu)
+            R = mu(1:3, 1:3);
+            t = mu(1:3, 5);
+            Rt = [R, t; 0 0 0 1];
+        end
     end
 end

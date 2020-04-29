@@ -162,8 +162,8 @@ xlabel('x')
 ylabel('y')
 % zlabel('z')
 
-Filename = sprintf('IMU_GPS_GT_data.mat');
-save(Filename, 'gps', 'imu', 'gt');
+Filename = sprintf('lib/IMU_GPS_GT_data.mat');
+save(Filename, 'gps', 'gpsAGL', 'imu', 'gt');
 
 %% Test Evaluation
 s_gps = evaluation(gt, gps)

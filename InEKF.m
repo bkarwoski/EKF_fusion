@@ -15,16 +15,17 @@ classdef InEKF < handle
         end
         
         function prediction(obj, u) 
-           %u_se3 = logm(H_prev \ H_pred)
-%            state = obj.Sigma; 
-%            state_pred = obj.gfun(state, u);
-           pose_prev = obj.mu
-           obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
-           pose_next = obj.mu
-           %todo remove state_pred, just use state?
-           invprev_next = pose_prev \ pose_next
-           u_se3 = logm(invprev_next)
-           obj.propagation(wedge(u_se3));
+            %u_se3 = logm(H_prev \ H_pred)
+            %            state = obj.Sigma;
+            %            state_pred = obj.gfun(state, u);
+            %            pose_prev = obj.posemat(obj.mu);
+            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+            %            pose_next = obj.posemat(obj.mu);
+            %todo remove state_pred, just use state?
+            %            invprev_next = pose_prev \ pose_next
+            %            u_se3 = logm(invprev_next);
+            %            u_se3_w = wedge(u_se3);
+            obj.propagation(u);
         end
         
         function propagation(obj, u) %propagation not needed
@@ -39,11 +40,11 @@ classdef InEKF < handle
             
             omega = u(4:6);
             accel = u(1:3);
-            prev_mu=obj.mu;
-            obj.mu(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
-            obj.mu(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
-            obj.mu(1:3, 5) = obj.mu(1:3, 5);
-            obj.mu=prev_mu+obj.mu*1/30;
+            f = zeros(5);
+            f(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
+            f(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
+            f(1:3, 5) = obj.mu(1:3, 5);
+            obj.mu = obj.mu + f * 1/30;
             
             A = zeros(9); 
             A(1:3, 1:3) = - skew(omega);
@@ -104,17 +105,16 @@ classdef InEKF < handle
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
             
-            obj.mu = zai_hat * obj.mu;
+            obj.mu = obj.mu * zai_hat; %order seems wrong
 
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end
         
-%         function Rt = posemat(obj, mu) %Not sure if this function makes sense
-%             Rt =  zeros(5);
-%             Rt(1:3, 1:3) = mu(1:3, 1:3);
-%             Rt( = mu(1:3, 5);
-%             Rt = [R, t; 0 0 0 1];
-%         end
+        function Rt = posemat(obj, mu)
+            R = mu(1:3, 1:3);
+            t = mu(1:3, 5);
+            Rt = [R, t; 0 0 0 1];
+        end
     end
 end

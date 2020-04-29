@@ -11,7 +11,8 @@ function varargout = run(pauseLen)
     initialStateMean = eye(5);
     initialStateCov = eye(9);
     deltaT = 1 / 30; %hope this doesn't cause floating point problems
-    numSteps = 81169;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+    n = 100;
+    numSteps = n;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
     
     results = zeros(7, numSteps);
     % time x y z Rx Ry Rz
@@ -40,7 +41,7 @@ function varargout = run(pauseLen)
     % plot3(gt(:,1), gt(:,2), gt(:,3), '.')
     
     % plot gps positions
-    plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), 'or')
+    plot3(GPSData(1:n,2), GPSData(1:n,3), GPSData(1:n,4), 'or')
     grid on
     hold on
     axis equal

@@ -69,14 +69,13 @@ classdef InEKF < handle
             S = H * obj.Sigma * H' + N;
             L = obj.Sigma * H' * inv(S);
             b = [0 0 0 0 1]';
-            Y = obj.mu * b + [obj.mu(1,4) 0 0 0 0]';
 
             % map mu 1 by 9 to lie group, 5 by 5
             % check slide 69
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 1
-            zai = L * (obj.mu * Y - gps);
+            zai = L * (obj.mu * gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);

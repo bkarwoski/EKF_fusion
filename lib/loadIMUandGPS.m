@@ -10,7 +10,7 @@
 % 'IMU_GPS_GT_data.mat'
 
 clear;
-dir = '../AGZ_subset/';
+dir = 'AGZ_subset/';
 %% load Accel.
 filename = append(dir , 'Log Files/RawAccel.csv');
 delimiter = ',';

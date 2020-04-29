@@ -40,9 +40,11 @@ classdef InEKF < handle
             
             omega = u(4:6);
             accel = u(1:3);
+            prev_mu=obj.mu;
             obj.mu(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
             obj.mu(1:3, 4) = obj.mu(1:3, 1:3) * accel +[0 0 -9.81]';
             obj.mu(1:3, 5) = obj.mu(1:3, 5);
+            obj.mu=prev_mu+obj.mu*1/30;
             
             A = zeros(9); 
             A(1:3, 1:3) = - skew(omega);

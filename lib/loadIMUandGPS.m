@@ -116,13 +116,15 @@ dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'EmptyValue' ,N
 fclose(fileID);
 
 imgid = dataArray{:, 1};
-coeff = 1;
-x_gt = (dataArray{:, 2} - dataArray{1, 2}(1, 1)) * coeff;
-y_gt = (dataArray{:, 3} - dataArray{1, 3}(1, 1)) * coeff;
+x_gt = (dataArray{:, 2} - dataArray{1, 2}(1, 1));
+y_gt = (dataArray{:, 3} - dataArray{1, 3}(1, 1));
 z_gt = (dataArray{:, 4} - dataArray{1, 4}(1, 1));
 omega_gt = dataArray{:, 5};
 phi_gt = dataArray{:, 6};
 kappa_gt = dataArray{:, 7};
+x_gps = dataArray{:, 8} - dataArray{1, 2}(1, 1);
+y_gps = dataArray{:, 9} - dataArray{1, 3}(1, 1);
+z_gps = dataArray{:, 10} - dataArray{1, 4}(1, 1);
 
 ts = [];
 for i = 1:length(imgid)
@@ -130,6 +132,8 @@ for i = 1:length(imgid)
 end
 
 gt = [ts, x_gt, y_gt, z_gt, omega_gt, phi_gt, kappa_gt];
+
+gpsAGL = [ts, x_gps, y_gps, z_gps];
 
 clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
@@ -146,11 +150,14 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 plot(x_gt, y_gt, 'o')
 grid on
 hold on
-axis equal
 plot(gps(:, 2), gps(:, 3), '.')
 grid on
 hold on
+plot(gpsAGL(:, 2), gpsAGL(:, 3), 'x')
+grid on
+hold on
 
+axis equal
 xlabel('x')
 ylabel('y')
 % zlabel('z')
@@ -159,6 +166,7 @@ Filename = sprintf('IMU_GPS_GT_data.mat');
 save(Filename, 'gps', 'imu', 'gt');
 
 %% Test Evaluation
-score = evaluation(gt, gps)
+s_gps = evaluation(gt, gps)
+s_gpsAGL = evaluation(gt, gpsAGL)
 
 

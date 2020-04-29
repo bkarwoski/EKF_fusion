@@ -55,7 +55,8 @@ classdef InEKF < handle
         end
         
         function correction(obj, gps_measurement)
-            gps = [gps_measurement, 0, 1]';
+            % gps = [gps_measurement, 0, 1]'; check slide 40
+            
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             gpsNoise = 1; %meters, initially constant
@@ -69,13 +70,14 @@ classdef InEKF < handle
             S = H * obj.Sigma * H' + N;
             L = obj.Sigma * H' * inv(S);
             b = [0 0 0 0 1]';
+            Y = obj.mu * b + [obj.mu(1,4) 0 0 0 0]';
 
             % map mu 1 by 9 to lie group, 5 by 5
             % check slide 69
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 1
-            zai = L * (obj.mu * gps - b);
+            zai = L * (obj.mu * Y - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);
@@ -86,7 +88,7 @@ classdef InEKF < handle
             % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
             e = 1e-9;
             if phi(3) > e
-                % assume theta in sphererical coordinate
+                % assume theta in spherical coordinate
                 theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
                 if theta < e
                     jacobian_phi = jacobian_phi + skew(phi);

@@ -1,7 +1,7 @@
 function varargout = run(pauseLen)
 %for testing
 clear
-pauseLen = 0;
+pauseLen = 0.1;
 
 %%Initializations
 %TODO: load data here
@@ -14,7 +14,7 @@ addpath([cd, filesep, 'lib'])
 initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
-numSteps = 100;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = 20;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
 
 results = zeros(7, numSteps);
 % time x y z Rx Ry Rz
@@ -62,6 +62,7 @@ for t = 1:numSteps
     end
     results(2:4, t) = filter.mu(5, 1:3); %just position so far
     plot3(results(2, t), results(3, t), results(4, t));
+%     disp(filter.mu(:,:));
     if pauseLen == inf
         pause;
     elseif pauseLen > 0

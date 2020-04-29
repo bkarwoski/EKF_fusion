@@ -104,7 +104,7 @@ classdef InEKF < handle
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
             
-            obj.mu = zai_hat * obj.mu; %order seems wrong
+            obj.mu = obj.mu * zai_hat; %order seems wrong
 
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    

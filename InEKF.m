@@ -38,13 +38,13 @@ classdef InEKF < handle
 
             % from slide 36, u doesn't need to be se(3), using raw IMU here.
             
-            omega = u(4:6)';
-            accel = u(1:3)';
-            prev_mu=obj.mu;
-            obj.mu(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
-            obj.mu(1:3, 4) = obj.mu(1:3, 1:3) * accel +[0 0 -9.81]';
-            obj.mu(1:3, 5) = obj.mu(1:3, 5);
-            obj.mu=prev_mu+obj.mu*1/30;
+            omega = u(4:6);
+            accel = u(1:3);
+            f = zeros(5);
+            f(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
+            f(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
+            f(1:3, 5) = obj.mu(1:3, 5);
+            obj.mu = obj.mu + f * 1/30;
             
             A = zeros(9); 
             A(1:3, 1:3) = - skew(omega);

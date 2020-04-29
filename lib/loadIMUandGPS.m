@@ -10,7 +10,7 @@
 % 'IMU_GPS_GT_data.mat'
 
 clear;
-dir = 'AGZ_subset/';
+dir = '../AGZ_subset/';
 %% load Accel.
 filename = append(dir , 'Log Files/RawAccel.csv');
 delimiter = ',';
@@ -116,7 +116,7 @@ dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'EmptyValue' ,N
 fclose(fileID);
 
 imgid = dataArray{:, 1};
-coeff = 50;
+coeff = 1;
 x_gt = (dataArray{:, 2} - dataArray{1, 2}(1, 1)) * coeff;
 y_gt = (dataArray{:, 3} - dataArray{1, 3}(1, 1)) * coeff;
 z_gt = (dataArray{:, 4} - dataArray{1, 4}(1, 1));
@@ -135,17 +135,25 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans;
 
 
 %% save data
-plot3(x_gt, -y_gt, z_gt, 'o')
+% plot3(x_gt, y_gt, z_gt, 'o')
+% grid on
+% hold on
+% axis equal
+% plot3(gps(:, 2), gps(:, 3), gps(:, 4), '.')
+% grid on
+% hold on
+
+plot(x_gt, y_gt, 'o')
 grid on
 hold on
 axis equal
-plot3(gps(:, 2), gps(:, 3), gps(:, 4), '.')
+plot(gps(:, 2), gps(:, 3), '.')
 grid on
 hold on
 
 xlabel('x')
 ylabel('y')
-zlabel('z')
+% zlabel('z')
 
 Filename = sprintf('IMU_GPS_GT_data.mat');
 save(Filename, 'gps', 'imu', 'gt');

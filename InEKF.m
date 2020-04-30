@@ -80,7 +80,7 @@ classdef InEKF < handle
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 1
-            zai = L * (obj.mu * gps - b);
+            zai = L * (inv(obj.mu) * gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);
@@ -89,17 +89,17 @@ classdef InEKF < handle
             % put phi_hat into so(3), and calculate the left jacobian
             jacobian_phi = eye(3);
             % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
-            e = 1e-9;
-            if phi(3) > e
-                % assume theta in spherical coordinate
-                theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
-                if theta < e
-                    jacobian_phi = jacobian_phi + skew(phi);
-                else
-                    jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
-                    + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
-                end
-            end
+            % e = 1e-9;
+            % if phi(3) > e
+            %     % assume theta in spherical coordinate
+            %     theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
+            %     if theta < e
+            %         jacobian_phi = jacobian_phi + skew(phi);
+            %     else
+            %         jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
+            %         + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
+            %     end
+            % end
            
             zai_hat(1:3, 1:3) = expm(skew(phi));
             zai_hat(1:3, 4) = jacobian_phi * rho1;

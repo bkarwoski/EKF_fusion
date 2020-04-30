@@ -108,6 +108,8 @@ classdef InEKF < handle
             obj.mu = obj.mu * zai_hat; %order seems wrong
 %             disp('after zai');
 %             disp(obj.mu(:,:))
+            %DEBUGGING ONLY, REMOVE LATER
+            obj.mu(:, 5) = gps;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

@@ -3,7 +3,7 @@ function varargout = run()
 clc
 clear
 close all
-pauseLen = 0.05;
+pauseLen = 0;
 
 %%Initializations
 %TODO: load data here
@@ -16,7 +16,7 @@ addpath([cd, filesep, 'lib'])
 initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
-numSteps = 300;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = 200;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
 
 results = zeros(7, numSteps);
 % time x y z Rx Ry Rz
@@ -62,7 +62,7 @@ for t = 1:numSteps
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
         disp('correction')
         filter.correction(nextGPS(2:4));
-        GPSIdx = IMUIdx + 1;
+        GPSIdx = GPSIdx + 1;
         nextGPS = GPSData(GPSIdx, :);
         plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'ok');
     end
@@ -75,12 +75,5 @@ for t = 1:numSteps
         pause(pauseLen);
     end
 end
-%if there is new IMU data:
-% filter.prediction(IMU data)
 
-%if there is new GPS data:
-    %filter.correction(GPS data)
-    
-%plot results
-%pause for some period of time
 end

@@ -105,12 +105,8 @@ classdef InEKF < handle
             zai_hat(1:3, 4) = jacobian_phi * rho1;
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
-%             disp(obj.mu(:,:))
+
             obj.mu = obj.mu * zai_hat; %order seems wrong
-%             disp('after zai');
-%             disp(obj.mu(:,:))
-            %DEBUGGING ONLY, REMOVE LATER
-%             obj.mu(:, 5) = gps;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

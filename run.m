@@ -1,8 +1,9 @@
 function varargout = run()
 %for testing
+clc
 clear
 close all
-pauseLen = 0.1;
+pauseLen = 0.05;
 
 %%Initializations
 %TODO: load data here
@@ -15,7 +16,7 @@ addpath([cd, filesep, 'lib'])
 initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
-numSteps = 20;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = 300;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
 
 results = zeros(7, numSteps);
 % time x y z Rx Ry Rz
@@ -41,11 +42,11 @@ nextGPS = GPSData(GPSIdx, :); %first GPS measurement
 %plot ground truth, raw GPS data
 
 % plot ground truth positions
-plot3(gt(:,1), gt(:,2), gt(:,3), '.')
+plot3(gt(:,2), gt(:,3), gt(:,4), '.g')
 grid on
 hold on
 % plot gps positions
-plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), 'or')
+plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), '.b')
 axis equal
 axis vis3d
 
@@ -56,16 +57,18 @@ for t = 1:numSteps
         filter.prediction(nextIMU(2:7));
         IMUIdx = IMUIdx + 1;
         nextIMU = IMUData(IMUIdx, :);
+        plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'or');
     end
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
         disp('correction')
         filter.correction(nextGPS(2:4));
         GPSIdx = IMUIdx + 1;
         nextGPS = GPSData(GPSIdx, :);
+        plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'ok');
     end
-    results(2:4, t) = filter.mu(5, 1:3); %just position so far
-    plot3(results(2, t), results(3, t), results(4, t));
-    disp(filter.mu(:,:));
+    results(2:4, t) = filter.mu(1:3, 5); %just position so far
+%     plot3(results(2, t), results(3, t), results(4, t), 'or');
+%     disp(filter.mu(1:3, 1:3));
     if pauseLen == inf
         pause;
     elseif pauseLen > 0

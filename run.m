@@ -3,7 +3,7 @@ function varargout = run()
 clc
 clear
 close all
-pauseLen = 0;
+pauseLen = 0.01;
 
 %%Initializations
 %TODO: load data here
@@ -41,12 +41,12 @@ nextGPS = GPSData(GPSIdx, :); %first GPS measurement
 
 %plot ground truth, raw GPS data
 
-% % plot ground truth positions
-% plot3(gt(:,2), gt(:,3), gt(:,4), '.g')
+% plot ground truth positions
+plot3(gt(:,2), gt(:,3), gt(:,4), '.g')
 grid on
 hold on
-% % plot gps positions
-% plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), '.b')
+% plot gps positions
+plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), '.b')
 axis equal
 axis vis3d
 

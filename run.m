@@ -3,7 +3,7 @@ function varargout = run()
 clc
 clear
 close all
-pauseLen = 0;
+pauseLen = inf;
 
 %%Initializations
 %TODO: load data here

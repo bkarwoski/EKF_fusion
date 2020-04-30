@@ -6,7 +6,7 @@ v_k = mu(1:3, 4);
 p_k = mu(1:3, 5);
 a_k = u(1:3)';
 omega_k = u(4:6)';
-g = [0; 0; -9.81];
+g = [0; 0; 9.81];
 
 R_k1 = R_k * Gamma_0(omega_k * deltaT);
 v_k1 = v_k + R_k * Gamma_1(omega_k * deltaT) * a_k * deltaT + g * deltaT;

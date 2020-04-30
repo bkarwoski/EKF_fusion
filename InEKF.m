@@ -70,10 +70,10 @@ classdef InEKF < handle
             covariance_v = [eye(3).*gpsNoise^2, zeros(3,2); zeros(2,5)];
             covariance_v(4,4) = 1;
             covariance_v(5,5) = 1;
-            N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
+            N = obj.mu \ covariance_v / obj.mu';
             % N = N(1:3, 1:3);
             S = H * obj.Sigma * H' + N;
-            L = obj.Sigma * H' * inv(S);
+            L = obj.Sigma * H' / S;
             b = [0 0 0 0 1]';
 
             % map mu 1 by 9 to lie group, 5 by 5
@@ -81,7 +81,7 @@ classdef InEKF < handle
             % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
             zai_hat = zeros(5);
             % zai 9 by 1
-            zai = L * (obj.mu * gps - b);
+            zai = L * (obj.mu \ gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);
@@ -90,26 +90,33 @@ classdef InEKF < handle
             % put phi_hat into so(3), and calculate the left jacobian
             jacobian_phi = eye(3);
             % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
-            e = 1e-9;
-            if phi(3) > e
-                % assume theta in spherical coordinate
-                theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
-                if theta < e
-                    jacobian_phi = jacobian_phi + skew(phi);
-                else
-                    jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
-                    + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
-                end
-            end
+            % e = 1e-9;
+
+            theta = norm(phi);
+            % jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
+            %     + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
+
+            % if phi(3) > e
+            %     % assume theta in spherical coordinate
+            %     theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
+            %     if theta < e
+            %         jacobian_phi = jacobian_phi + skew(phi);
+            %     else
+            %         jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
+            %         + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
+            %     end
+            % end
            
             zai_hat(1:3, 1:3) = expm(skew(phi));
             zai_hat(1:3, 4) = jacobian_phi * rho1;
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
-%             disp(obj.mu(:,:))
+            disp(obj.mu(:,:))
             obj.mu = obj.mu * zai_hat; %order seems wrong
-%             disp('after zai');
-%             disp(obj.mu(:,:))
+            disp('zai')
+            disp(zai_hat)
+            disp('after zai');
+            disp(obj.mu(:,:))
             %DEBUGGING ONLY, REMOVE LATER
 %             obj.mu(:, 5) = gps;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...

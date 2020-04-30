@@ -16,7 +16,7 @@ addpath([cd, filesep, 'lib'])
 initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
-numSteps = 200;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = 5000;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
 
 results = zeros(7, numSteps);
 % time x y z Rx Ry Rz
@@ -41,29 +41,33 @@ nextGPS = GPSData(GPSIdx, :); %first GPS measurement
 
 %plot ground truth, raw GPS data
 
-% plot ground truth positions
-plot3(gt(:,2), gt(:,3), gt(:,4), '.g')
+% % plot ground truth positions
+% plot3(gt(:,2), gt(:,3), gt(:,4), '.g')
 grid on
 hold on
-% plot gps positions
-plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), '.b')
+% % plot gps positions
+% plot3(GPSData(:,2), GPSData(:,3), GPSData(:,4), '.b')
 axis equal
 axis vis3d
 
+counter = 0
+
 for t = 1:numSteps
     currT = t * deltaT;
-    if(currT >= nextIMU(1)) %if the next IMU measurement has happened
-        disp('prediction')
-        filter.prediction(nextIMU(2:7));
-        IMUIdx = IMUIdx + 1;
-        nextIMU = IMUData(IMUIdx, :);
-        plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'or');
-    end
+    % if(currT >= nextIMU(1)) %if the next IMU measurement has happened
+    %     disp('prediction')
+    %     filter.prediction(nextIMU(2:7));
+    %     IMUIdx = IMUIdx + 1;
+    %     nextIMU = IMUData(IMUIdx, :);
+    %     plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'or');
+    % end
     if(currT >= nextGPS(1)) %if the next GPS measurement has happened
         disp('correction')
+        counter = counter + 1;
         filter.correction(nextGPS(2:4));
         GPSIdx = GPSIdx + 1;
         nextGPS = GPSData(GPSIdx, :);
+        plot3(nextGPS(2), nextGPS(3), nextGPS(4), '.g');
         plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'ok');
     end
     results(2:4, t) = filter.mu(1:3, 5); %just position so far
@@ -75,5 +79,6 @@ for t = 1:numSteps
         pause(pauseLen);
     end
 end
+disp(counter)
 
 end

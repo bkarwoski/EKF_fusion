@@ -2,119 +2,79 @@ classdef InEKF < handle
     properties
         mu;                 % Pose Mean
         Sigma;              % Pose Sigma
-        mu_cart;
-        sigma_cart;
-        Q;                  %IMU accel and gyro noise
+        mu_pred;             % Mean after prediction step
+        Sigma_pred;          % Sigma after prediction step
     end
     
     methods
         function obj = InEKF(init)
             obj.mu = init.mu;
             obj.Sigma = init.Sigma;
-            obj.Q = init.Q;
         end
         
-        function prediction(obj, u) 
-            %u_se3 = logm(H_prev \ H_pred)
-            %            state = obj.Sigma;
-            %            state_pred = obj.gfun(state, u);
-            %            pose_prev = obj.posemat(obj.mu);
-            obj.mu = imuDynamics(obj.mu, u, 1/10); 
-            %TODO not hardcode dT
-            %            pose_next = obj.posemat(obj.mu);
-            %todo remove state_pred, just use state?
-            %            invprev_next = pose_prev \ pose_next
-            %            u_se3 = logm(invprev_next);
-            %            u_se3_w = wedge(u_se3);
-            obj.propagation(u);
-        end
-        
-        function propagation(obj, u) %propagation not needed
-            %u is in se(3)
-            %what are the shapes of u, obj.mu?
-                % u is square, mu's 2nd dim == u's first dim
-            %propagate meanS
-            %obj.mu_pred = obj.mu * expm(u);
-            %propagate covariance
+        function prediction(obj, u)
+            g = [0; 0; 9.81];
+            dt = 1 / 10;
+            R_k = obj.mu(1:3, 1:3);
+            v_k = obj.mu(1:3, 4);
+            p_k = obj.mu(1:3, 5);
+            a_k = (1:3);
+            omega_k = u(4:6);
 
-            % from slide 36, u doesn't need to be se(3), using raw IMU here.
+            R_pred = R_k * expm(skew(omega_k * dt));
+            v_pred = v_k + (R_k * a_k' + g) *dt;
+            p_pred = p_k +  v_k * dt + 0.5 * (R_k * a_k' + g) * dt ^2;
             
-            omega = u(4:6);
-            accel = u(1:3);
-            f = zeros(5);
-            f(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
-            f(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
-            f(1:3, 5) = obj.mu(1:3, 5);
-            obj.mu = obj.mu + f * 1/30;
-            
+            H_pred = [R_pred, v_pred, p_pred;
+                        zeros(1,3), 1, 0;
+                        zeros(1,3), 0, 1];
+                       
+            obj.propagation(H_pred, a_k, omega_k);
+        end
+
+        function propagation(obj, H_pred, a_k, omega_k)
+            dt = 1 / 10;
+            obj.mu_pred = H_pred;
+
+            % log linear
             A = zeros(9); 
-            A(1:3, 1:3) = - skew(omega);
-            A(4:6, 1:3) = - skew(accel);
-            A(4:6, 4:6) = - skew(omega);
+            A(1:3, 1:3) = - skew(omega_k);
+            A(4:6, 1:3) = - skew(a_k);
+            A(4:6, 4:6) = - skew(omega_k);
             A(7:9, 4:6) = eye(3);
-            A(7:9, 7:9) = -skew(omega); 
+            A(7:9, 7:9) = -skew(omega_k); 
 
-            obj.Sigma = (A * obj.Sigma + obj.Sigma * A' + obj.Q) * 1/30 + obj.Sigma;
-            
+            phi = expm(A * dt);
+            obj.Sigma_pred = obj.Sigma + phi * eye(9) * phi';
         end
         
         function correction(obj, gps_measurement)
-            gps = [gps_measurement, 0, 1]'; 
-            
-            H = zeros(5, 9);
-            H(1:3, 7:9) = eye(3);
-            gpsNoise = 1; %meters, initially constant
-            % covariance should be 5 instead of 3 so that N, hence L could match 
-            % the dimension when calculating mu and sigma
-            covariance_v = [eye(3).*gpsNoise^2, zeros(3,2); zeros(2,5)];
-            covariance_v(4,4) = 1;
-            covariance_v(5,5) = 1;
-            N = inv(obj.mu) * covariance_v * (inv(obj.mu))';
-            % N = N(1:3, 1:3);
-            S = H * obj.Sigma * H' + N;
-            L = obj.Sigma * H' * inv(S);
-            b = [0 0 0 0 1]';
+            b = [0; 0; 0; 0; 1];
+            H = [zeros(3), zeros(3), eye(3)];
 
-            % map mu 1 by 9 to lie group, 5 by 5
-            % check slide 69
-            % zai 3(K+1) vector, hence K is 2, and zai_hat should be 5 by 5 since mu 5 by 5
+            % N just a covariance, so instead of doing the covariance stuff, just a 3 by 3
+            N = eye(3);             
+            Y = [gps_measurement'; 0; 1];
+            nu = obj.mu_pred \ Y - b; 
+            S = H * obj.Sigma_pred * H' + N;
+            K = obj.Sigma_pred * H' * (S \ eye(size(S)));
+            
+            % calculate zai
+            zai = K * nu(1:3);
             zai_hat = zeros(5);
-            % zai 9 by 1
-            zai = L * (inv(obj.mu) * gps - b);
             phi = zai(1:3); 
             rho1 = zai(4:6);
             rho2 = zai(7:9);
-
-            % check slide 66
-            % put phi_hat into so(3), and calculate the left jacobian
             jacobian_phi = eye(3);
-            % deal with special condition, 1e-9 a threshold for small value, could change to smaller values
-            % e = 1e-9;
-            % if phi(3) > e
-            %     % assume theta in spherical coordinate
-            %     theta = atan(sqrt(phi(1)^2 + phi(2)^2) / phi(3));
-            %     if theta < e
-            %         jacobian_phi = jacobian_phi + skew(phi);
-            %     else
-            %         jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
-            %         + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
-            %     end
-            % end
-           
+            theta = norm(phi);
             zai_hat(1:3, 1:3) = expm(skew(phi));
             zai_hat(1:3, 4) = jacobian_phi * rho1;
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
 
-            obj.mu = obj.mu * zai_hat; %order seems wrong
-            obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
-                + L * N * L';    
+            obj.mu = obj.mu_pred * zai_hat;
+
+            obj.Sigma = (eye(9) - K * H) * obj.Sigma_pred * (eye(9) - K * H)' + K * N * K';
         end
-        
-%         function Rt = posemat(obj, mu)
-%             R = mu(1:3, 1:3);
-%             t = mu(1:3, 5);
-%             Rt = [R, t; 0 0 0 1];
-%         end
     end
 end

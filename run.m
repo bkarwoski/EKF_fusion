@@ -16,7 +16,7 @@ addpath([cd, filesep, 'lib'])
 initialStateMean = eye(5);
 initialStateCov = eye(9);
 deltaT = 1 / 30; %hope this doesn't cause floating point problems
-numSteps = 5000;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
+numSteps = 100000;%TODO largest timestamp in GPS file, divided by deltaT, cast to int
 
 results = zeros(7, numSteps);
 % time x y z Rx Ry Rz
@@ -50,18 +50,22 @@ hold on
 axis equal
 axis vis3d
 
-counter = 0
+counter = 0;
+MAXIGPS = 2708;
+MAXIIMU = 27050;
+isStart = false;
 
 for t = 1:numSteps
     currT = t * deltaT;
-    % if(currT >= nextIMU(1)) %if the next IMU measurement has happened
-    %     disp('prediction')
-    %     filter.prediction(nextIMU(2:7));
-    %     IMUIdx = IMUIdx + 1;
-    %     nextIMU = IMUData(IMUIdx, :);
-    %     plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'or');
-    % end
-    if(currT >= nextGPS(1)) %if the next GPS measurement has happened
+    if(currT >= nextIMU(1)) %if the next IMU measurement has happened
+        disp('prediction')
+        filter.prediction(nextIMU(2:7));
+        isStart = true;
+        IMUIdx = IMUIdx + 1;
+        nextIMU = IMUData(IMUIdx, :);
+        plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'or');
+    end
+    if(currT >= nextGPS(1) & isStart) %if the next GPS measurement has happened
         disp('correction')
         counter = counter + 1;
         filter.correction(nextGPS(2:4));
@@ -77,6 +81,9 @@ for t = 1:numSteps
         pause;
     elseif pauseLen > 0
         pause(pauseLen);
+    end
+    if IMUIdx >= MAXIIMU || GPSIdx >= MAXIGPS
+        break
     end
 end
 disp(counter)

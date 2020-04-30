@@ -16,7 +16,6 @@ function score = evaluation(gt, estimation)
         score = score + norm(gt(i, 2:4) - estimation(estimation_idx, 2:4)) ^ 2;
         count = count + 1;
     end
-    count
     score = sqrt(score / count);
 end
 

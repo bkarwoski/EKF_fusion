@@ -15,33 +15,37 @@ classdef InEKF < handle
         end
         
         function prediction(obj, u) 
-           %u_se3 = logm(H_prev \ H_pred)
-%            state = obj.Sigma; 
-%            state_pred = obj.gfun(state, u);
-           pose_prev = obj.posemat(obj.mu);
-           obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
-           pose_next = obj.posemat(obj.mu);
-           %todo remove state_pred, just use state?
-           invprev_next = pose_prev \ pose_next;
-           u_se3 = logm(invprev_next);
-           obj.propagation(u_se3);
+            %u_se3 = logm(H_prev \ H_pred)
+            %            state = obj.Sigma;
+            %            state_pred = obj.gfun(state, u);
+            %            pose_prev = obj.posemat(obj.mu);
+            obj.mu = imuDynamics(obj.mu, u, 1/10); 
+            %TODO not hardcode dT
+            %            pose_next = obj.posemat(obj.mu);
+            %todo remove state_pred, just use state?
+            %            invprev_next = pose_prev \ pose_next
+            %            u_se3 = logm(invprev_next);
+            %            u_se3_w = wedge(u_se3);
+            obj.propagation(u);
         end
         
         function propagation(obj, u) %propagation not needed
             %u is in se(3)
             %what are the shapes of u, obj.mu?
                 % u is square, mu's 2nd dim == u's first dim
-            %propagate mean
+            %propagate meanS
             %obj.mu_pred = obj.mu * expm(u);
             %propagate covariance
 
             % from slide 36, u doesn't need to be se(3), using raw IMU here.
             
-            omega = u(5:7);
-            accel = u(2:4);
-            obj.mu(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
-            obj.mu(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
-            obj.mu(1:3, 5) = obj.mu(1:3, 5);
+            omega = u(4:6);
+            accel = u(1:3);
+            f = zeros(5);
+            f(1:3, 1:3) = obj.mu(1:3, 1:3) * skew(omega);
+            f(1:3, 4) = obj.mu(1:3, 1:3) * accel' +[0 0 -9.81]';
+            f(1:3, 5) = obj.mu(1:3, 5);
+            obj.mu = obj.mu + f * 1/30;
             
             A = zeros(9); 
             A(1:3, 1:3) = - skew(omega);
@@ -50,12 +54,14 @@ classdef InEKF < handle
             A(7:9, 4:6) = eye(3);
             A(7:9, 7:9) = -skew(omega); 
 
-            obj.Sigma = A * obj.Sigma + obj.Sigma * A' + obj.Q;
+            obj.Sigma = (A * obj.Sigma + obj.Sigma * A' + obj.Q) * 1/30 + obj.Sigma;
             
         end
         
         function correction(obj, gps_measurement)
-            gps = [gps_measurement, 0, 1]';
+
+            gps = [gps_measurement, 0, 1]'; 
+
             H = zeros(5, 9);
             H(1:3, 7:9) = eye(3);
             gpsNoise = 1; %meters, initially constant
@@ -100,17 +106,20 @@ classdef InEKF < handle
             zai_hat(1:3, 4) = jacobian_phi * rho1;
             zai_hat(1:3, 5) = jacobian_phi * rho2;
             zai_hat(4:5, 4:5) = eye(2);
-            
-            obj.mu = zai_hat * obj.mu;
-
+%             disp(obj.mu(:,:))
+            obj.mu = obj.mu * zai_hat; %order seems wrong
+%             disp('after zai');
+%             disp(obj.mu(:,:))
+            %DEBUGGING ONLY, REMOVE LATER
+%             obj.mu(:, 5) = gps;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end
         
-        function Rt = posemat(obj, mu)
-            R = mu(1:3, 1:3);
-            t = mu(1:3, 5);
-            Rt = [R, t; 0 0 0 1];
-        end
+%         function Rt = posemat(obj, mu)
+%             R = mu(1:3, 1:3);
+%             t = mu(1:3, 5);
+%             Rt = [R, t; 0 0 0 1];
+%         end
     end
 end

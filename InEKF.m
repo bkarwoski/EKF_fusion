@@ -19,7 +19,8 @@ classdef InEKF < handle
             %            state = obj.Sigma;
             %            state_pred = obj.gfun(state, u);
             %            pose_prev = obj.posemat(obj.mu);
-            obj.mu = imuDynamics(obj.mu, u, 1/30); %TODO not hardcode dT
+            obj.mu = imuDynamics(obj.mu, u, 1/10); 
+            %TODO not hardcode dT
             %            pose_next = obj.posemat(obj.mu);
             %todo remove state_pred, just use state?
             %            invprev_next = pose_prev \ pose_next
@@ -109,7 +110,7 @@ classdef InEKF < handle
 %             disp('after zai');
 %             disp(obj.mu(:,:))
             %DEBUGGING ONLY, REMOVE LATER
-            obj.mu(:, 5) = gps;
+%             obj.mu(:, 5) = gps;
             obj.Sigma = (eye(9) - L * H) * obj.Sigma * (eye(9) - L * H)' ...
                 + L * N * L';    
         end

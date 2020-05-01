@@ -18,11 +18,11 @@ classdef InEKF < handle
             R_k = obj.mu(1:3, 1:3);
             v_k = obj.mu(1:3, 4);
             p_k = obj.mu(1:3, 5);
-            a_k = (1:3);
+            a_k = u(1:3);
             omega_k = u(4:6);
 
             R_pred = R_k * expm(skew(omega_k * dt));
-            v_pred = v_k + (R_k * a_k' + g) *dt;
+            v_pred = v_k + (R_k * a_k' + g) * dt;
             p_pred = p_k +  v_k * dt + 0.5 * (R_k * a_k' + g) * dt ^2;
             
             H_pred = [R_pred, v_pred, p_pred;

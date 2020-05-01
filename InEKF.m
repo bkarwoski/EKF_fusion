@@ -53,7 +53,7 @@ classdef InEKF < handle
             H = [zeros(3), zeros(3), eye(3)];
 
             % N just a covariance, so instead of doing the covariance stuff, just a 3 by 3
-            N = eye(3);             
+            N = eye(3).*0.5;             
             Y = [gps_measurement'; 0; 1];
             nu = obj.mu_pred \ Y - b; 
             S = H * obj.Sigma_pred * H' + N;

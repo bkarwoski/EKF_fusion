@@ -1,4 +1,3 @@
-function varargout = run()
 %for testing
 clc
 clear
@@ -77,7 +76,10 @@ for t = 1:numSteps
 %         plotPose(filter.mu(1:3, 1:3), filter.mu(1:3, 5), filter.mu(1:3,4));
         
     end
-    results(2:4, t) = filter.mu(1:3, 5);
+    results(1, t) = currT;
+    results(2:4, t) = filter.mu(1:3, 5); %just position so far
+%     plot3(results(2, t), results(3, t), results(4, t), 'or');
+%     disp(filter.mu(1:3, 1:3));
     if pauseLen == inf
         pause;
     elseif pauseLen > 0
@@ -94,22 +96,39 @@ xlabel('x, m');
 ylabel('y, m');
 zlabel('z, m');
 
-    function []= plotPose(R, t, v)
-        v_scale = 0.1;
-        v = v.*v_scale;
-        x = t(1);
-        y = t(2);
-        z = t(3);
-        x_vec = R * [1; 0; 0];
-        y_vec = R * [0; 1; 0];
-        z_vec = R * [0; 0; 1];
-        vx = v(1);
-        vy = v(2);
-        vz = v(3);
-        quiver3(x, y, z, x_vec(1), x_vec(2), x_vec(3), 'r');
-        quiver3(x, y, z, y_vec(1), y_vec(2), y_vec(3), 'g');
-        quiver3(x, y, z, z_vec(1), z_vec(2), z_vec(3), 'b');
-%         quiver3(x, y, z, vx, vy, vz, 'k');
-    end
+%% Evaluation
+gps_score = evaluation(gt, GPSData)
+
+results_eval = results.';
+score = 0;
+estimation_idx = 1;
+count = 0;    
+for i = 2:length(gt)
+    score = score + norm(gt(i, 2:4) - results_eval(30 * (i-1), 2:4)) ^ 2;
+    count = count + 1;
 end
+count
+score = sqrt(score / count)
+
+
+
+%% Function
+function []= plotPose(R, t, v)
+    v_scale = 0.1;
+    v = v.*v_scale;
+    x = t(1);
+    y = t(2);
+    z = t(3);
+    x_vec = R * [1; 0; 0];
+    y_vec = R * [0; 1; 0];
+    z_vec = R * [0; 0; 1];
+    vx = v(1);
+    vy = v(2);
+    vz = v(3);
+    quiver3(x, y, z, x_vec(1), x_vec(2), x_vec(3), 'r');
+    quiver3(x, y, z, y_vec(1), y_vec(2), y_vec(3), 'g');
+    quiver3(x, y, z, z_vec(1), z_vec(2), z_vec(3), 'b');
+%         quiver3(x, y, z, vx, vy, vz, 'k');
+end
+
 

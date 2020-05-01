@@ -7,7 +7,7 @@ function score = evaluation(gt, estimation)
     for i = 1:length(gt)
         cur_ts = gt(i, 1);
         
-        while estimation_idx <= length(estimation) && abs(estimation(estimation_idx, 1) - cur_ts) > 0.01
+        while estimation_idx <= length(estimation) && abs(estimation(estimation_idx, 1) - cur_ts) > 1/30
             estimation_idx = estimation_idx + 1;
         end
         if estimation_idx > length(estimation)
@@ -16,6 +16,15 @@ function score = evaluation(gt, estimation)
         score = score + norm(gt(i, 2:4) - estimation(estimation_idx, 2:4)) ^ 2;
         count = count + 1;
     end
+    count
     score = sqrt(score / count);
+    
+
+%     for i = 2:length(gt)
+%         score = score + norm(gt(i, 2:4) - estimation(3*i-3, 2:4)) ^ 2;
+%         count = count + 1;
+%     end
+%     count
+%     score = sqrt(score / count);
 end
 

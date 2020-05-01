@@ -18,12 +18,12 @@ classdef InEKF < handle
             R_k = obj.mu(1:3, 1:3);
             v_k = obj.mu(1:3, 4);
             p_k = obj.mu(1:3, 5);
-            a_k = (1:3);
+            a_k = u(1:3);
             omega_k = u(4:6);
 
             R_pred = R_k * expm(skew(omega_k * dt));
-            v_pred = v_k + (R_k * a_k' + g) *dt;
-            p_pred = p_k +  v_k * dt + 0.5 * (R_k * a_k' + g) * dt ^2;
+            v_pred = v_k + (R_k * Gamma_1(omega_k * dt) * a_k' + g) *dt;
+            p_pred = p_k +  v_k * dt + 0.5 * (2 * R_k *  Gamma_2(omega_k * dt) * a_k' + g) * dt ^2;
             
             H_pred = [R_pred, v_pred, p_pred;
                         zeros(1,3), 1, 0;
@@ -67,6 +67,8 @@ classdef InEKF < handle
             rho2 = zai(7:9);
             jacobian_phi = eye(3);
             theta = norm(phi);
+            jacobian_phi = jacobian_phi + (1 - cos(theta)) / theta^2 * skew(phi) ...
+                + (theta - sin(theta)) / theta^3 * (skew(phi)^2);
             zai_hat(1:3, 1:3) = expm(skew(phi));
             zai_hat(1:3, 4) = jacobian_phi * rho1;
             zai_hat(1:3, 5) = jacobian_phi * rho2;

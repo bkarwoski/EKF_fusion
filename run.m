@@ -1,4 +1,3 @@
-function varargout = run()
 %for testing
 clc
 clear
@@ -74,6 +73,7 @@ for t = 1:numSteps
         plot3(nextGPS(2), nextGPS(3), nextGPS(4), '.g');
         plot3(filter.mu(1, 5), filter.mu(2, 5), filter.mu(3, 5), 'ok');
     end
+    results(1, t) = currT;
     results(2:4, t) = filter.mu(1:3, 5); %just position so far
 %     plot3(results(2, t), results(3, t), results(4, t), 'or');
 %     disp(filter.mu(1:3, 1:3));
@@ -88,4 +88,16 @@ for t = 1:numSteps
 end
 disp(counter)
 
+%% Evaluation
+gps_score = evaluation(gt, GPSData)
+
+results_eval = results.';
+score = 0;
+estimation_idx = 1;
+count = 0;    
+for i = 2:length(gt)
+    score = score + norm(gt(i, 2:4) - results_eval(30 * (i-1), 2:4)) ^ 2;
+    count = count + 1;
 end
+count
+score = sqrt(score / count)
